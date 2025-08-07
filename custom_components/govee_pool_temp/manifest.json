@@ -1,0 +1,11 @@
+{
+  "domain": "govee_pool_temp",
+  "name": "Govee Pool Temp",
+  "codeowners": ["@jordanruthe"],
+  "config_flow": true,
+  "documentation": "https://www.home-assistant.io/integrations/govee_pool_temp",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/jordanruthe/govee_pool_temp/issues",
+  "loggers": ["custom_components.govee_pool_temp"],
+  "version": "2025.6.1"
+}

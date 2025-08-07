@@ -1,0 +1,2 @@
+DEFAULT_SCAN_INTERVAL = 60
+DOMAIN = "govee_pool_temp"
