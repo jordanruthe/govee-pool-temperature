@@ -9,12 +9,13 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.const import UnitOfTemperature
-from homeassistant.core import HomeAssistant
+from homeassistant.core import callback, HomeAssistant
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
 )
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 
@@ -44,7 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     async_add_entities(hass.data[DOMAIN][config_entry.entry_id])
 
 
-class GoveeTemperatureSensor(SensorEntity):
+class GoveeTemperatureSensor(CoordinatorEntity, SensorEntity):
     """Representation of a Govee sensor."""
     _attr_name = "Govee Pool Temperature"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
@@ -53,8 +54,9 @@ class GoveeTemperatureSensor(SensorEntity):
 
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry, device_id):
         """Initialize the sensor."""
+        super().__init__(config_entry.coordinator)
         self._hass = hass
-        self._coordinator = config_entry.coordinator
+        self.coordinator = config_entry.coordinator
         self._config_entry = config_entry
         self._device = config_entry.coordinator.get_device_by_id(device_id)
         self._device_id = device_id
@@ -76,13 +78,10 @@ class GoveeTemperatureSensor(SensorEntity):
         temp = float(data["tem"])/100
         return temp
     
+    @callback
     def _handle_coordinator_update(self) -> None:
         """Update sensor with latest data from coordinator."""
         # This method is called by your DataUpdateCoordinator when a successful update runs.
         self._device = self.coordinator.get_device_by_id(self._device_id)
         _LOGGER.info("Device: %s", self._device)
         self.async_write_ha_state()
-
-    # async def async_update(self):
-    #     """Update the sensor state."""
-    #     await self._hass.data[DOMAIN][self._config_entry.entry_id].update()
