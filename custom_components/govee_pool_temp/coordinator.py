@@ -63,6 +63,9 @@ class GoveeCoordinator(DataUpdateCoordinator):
             _LOGGER.warning("Error getting data")
             return
         data = await response.json()
+        if "data" not in data:
+            _LOGGER.error("Unexpected response from Govee API: %s", data)
+            raise UpdateFailed(f"Unexpected response from Govee API: {data}")
         devices = data["data"]["devices"]
         self.devices = devices
 
