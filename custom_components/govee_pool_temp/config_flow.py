@@ -74,7 +74,7 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 data = await response.json(content_type=None)
                 _LOGGER.debug("Response: %s", data)
                 token = data.get('client', {}).get('token', None)
-                refresh_token = token = data.get('client', {}).get('refreshToken', None)
+                refresh_token = data.get('client', {}).get('refreshToken', None)
                 _LOGGER.debug("Response: %s", token)
                 if token is None:
                     _LOGGER.error("Login request failed")
@@ -109,7 +109,7 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         await self.async_set_unique_id(identity_id)
         self._abort_if_unique_id_configured()
 
-        return self.async_create_entry(title=f"Govee {identity_id[:4]}...", data={"token": token, "refreshToken": refresh_token})
+        return self.async_create_entry(title=f"Govee {identity_id[:4]}...", data={"token": token, "refreshToken": refresh_token, "username": user_input.get("username"), "password": user_input.get("password")})
 
 class ConfigFlow(OptionsFlow):
     """Handle options."""
