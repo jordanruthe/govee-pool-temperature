@@ -12,6 +12,7 @@ from homeassistant.const import (
     CONF_USERNAME,
 )
 from homeassistant.core import callback, HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
@@ -69,12 +70,12 @@ class GoveeCoordinator(DataUpdateCoordinator):
         }
         response = await session.post(LOGIN_URL, headers=HEADERS, json=credentials)
         if response.status != 200:
-            raise UpdateFailed("Re-authentication failed: bad status")
+            raise ConfigEntryAuthFailed("Re-authentication failed: bad status")
         data = await response.json(content_type=None)
         token = data.get('client', {}).get('token')
         refresh_token = data.get('client', {}).get('refreshToken')
         if not token:
-            raise UpdateFailed(f"Re-authentication failed: {data}")
+            raise ConfigEntryAuthFailed(f"Re-authentication failed: {data}")
         self.token = token
         self.refreshToken = refresh_token
         self.hass.config_entries.async_update_entry(
@@ -95,7 +96,7 @@ class GoveeCoordinator(DataUpdateCoordinator):
         if data.get("status") == 401 or "data" not in data:
             _LOGGER.warning("Token invalid, attempting re-authentication")
             if not self.username or not self.password:
-                raise UpdateFailed("Token expired and no credentials stored — please reconfigure the integration")
+                raise ConfigEntryAuthFailed("Token expired and no credentials stored — please reconfigure the integration")
             await self._async_login(session)
             headers = {**HEADERS, "authorization": f"Bearer {self.token}"}
             response = await session.get(DEVICE_LIST_URL, headers=headers)
